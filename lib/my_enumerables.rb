@@ -1,42 +1,34 @@
 module Enumerable
   # Your code goes here
-  def my_each_with_index
+  def my_each_with_index(&block)
     idx = 0
-    for item in self
-      yield item, idx
+    my_each do |item|
+      block.call(item, idx)
       idx += 1
     end
+    self
   end
 
   def my_select(&block)
-    values = []
+    selected = []
     my_each do |item|
       if block.call(item)
-        values << item
+        selected.push(item)
       end
     end
-    values
+    selected
   end
 
   def my_all?(&block)
-    my_var = true
-    my_each do |item|
-      if block.call(item)
-        my_var = true
-      else
-        return false
-      end
-    end
-    my_var
-  end
+    my_bool = true
 
-  def my_any?(&block)
-    my_each do |x|
-      if block.call(x)
-        return true
+    my_each do |item|
+      if !block.call(item)
+        my_bool = false
       end
     end
-    return false
+
+    my_bool
   end
 
   def my_none?(&block)
@@ -52,40 +44,36 @@ module Enumerable
   def my_count(&block)
     count = 0
 
-    if block_given?
+    if !block_given?
+      return self.length
+    elsif block_given?
       my_each do |item|
-        if block.call(item)
-          count += 1
-        end
+        block.call(item) ? count += 1 : count
       end
-    else
-      count = self.length
     end
 
     count
   end
 
   def my_map(&block)
-    final = []
+    map = []
 
     if block_given?
       my_each do |item|
-        final << block.call(item)
+        map.push(block.call(item))
       end
     end
-    
-    final
+
+    map
   end
 
   def my_inject(initial, &block)
-   accumulator = initial
-   my_each do |item|
-    accumulator = block.call(accumulator, item)
-   end
+    my_each do |item|
+      initial = block.call(initial, item)
+    end
 
-   accumulator
+    initial
   end
-
 end
 
 # You will first have to define my_each
@@ -95,10 +83,10 @@ end
 class Array
   # Define my_each here
   def my_each(&block)
-   for item in self
-    block.call(item)
-   end
+    for item in self
+      block.call(item)
+    end
 
-   return self
+    self
   end
 end
